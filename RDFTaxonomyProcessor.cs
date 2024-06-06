@@ -329,7 +329,7 @@ internal class RDFTaxonomyProcessor : EventNotifier
         return Options.FormatForPostgres ? @"\N" : string.Empty;
     }
 
-    private static string GeValueAfterLastSlash(string text)
+    private static string GetValueAfterLastSlash(string text)
     {
         var lastSlashIndex = text.LastIndexOf('/');
 
@@ -403,7 +403,7 @@ internal class RDFTaxonomyProcessor : EventNotifier
                             // taxonomyRank should be of the form "http://purl.uniprot.org/core/Species"
                             // Extract the text after the last forward slash
 
-                            taxonomyTerm.Rank = GeValueAfterLastSlash(taxonomyRank);
+                            taxonomyTerm.Rank = GetValueAfterLastSlash(taxonomyRank);
                             break;
 
                         case "mnemonic":
