@@ -11,8 +11,9 @@ The RDF Taxonomy Converter is a console application, and must be run from the Wi
 ```
 RDF_Taxonomy_Converter.exe
  InputFilePath [/O:OutputFilePath]
+ [/IncludeRank]
  [/IncludeParents] [/IncludeGrandparents] 
- [/IncludeMnemonic] [/IncludeRank]
+ [/CommonName] [/Synonym] [/Mnemonic] [/OtherNames]
  [/Postgres]
  [/ParamFile:ParamFileName.conf] [/CreateParamFile]
 ```
@@ -24,13 +25,19 @@ InputFilePath is a path to the input file
 
 Use `/O` or `-O` to specify the output file path
 
+Use `/IncludeRank:False` to disable including the classification rank (family, genus, species, etc.) in the output
+
 Use `/IncludeParents:False` to disable including columns Parent_Term_Name and Parent_Term_ID in the output
 
 Use `/IncludeGrandparents:False` to disable including columns Grandparent_Term_Name and Grandparent_Term_ID in the output
 
+Use `/CommonName:False` to disable including the common name
+
+Use `/Synonym:False` to disable including the synonym
+
 Use `/IncludeMnemonic:False` to disable including the mnemonic name (a five letter abbreviation of the scientific name)
 
-Use `/IncludeRank:False` to disable including the classification rank (family, genus, species, etc.) in the output
+Use `/OtherNames:False` to disable creating a file listing other names for the taxonomy terms
 
 Use `/Postgres` to use \N for null values (empty columns in the output file), escape backslashes, and replace double quotes with ""
 * This allows the data file to be imported using the COPY command, e.g.
