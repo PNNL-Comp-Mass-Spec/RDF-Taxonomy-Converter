@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Xml;
 using PRISM;
 
@@ -122,7 +123,7 @@ internal class RDFTaxonomyProcessor : EventNotifier
         return 0;
     }
 
-    private bool ConvertRdfTaxonomyFile(FileSystemInfo inputFile, FileSystemInfo outputFile)
+    private bool ConvertRdfTaxonomyFile(FileSystemInfo inputFile, FileInfo outputFile)
     {
         try
         {
@@ -134,8 +135,7 @@ internal class RDFTaxonomyProcessor : EventNotifier
 
             // Read the input file using a forward-only XML reader
 
-            using var xmlReader = new XmlTextReader(
-                new FileStream(inputFile.FullName, FileMode.Open, FileAccess.Read, FileShare.Read));
+            using var xmlReader = new XmlTextReader(new FileStream(inputFile.FullName, FileMode.Open, FileAccess.Read, FileShare.Read));
 
             var currentIdentifier = string.Empty;
             var parseNextRdfType = false;
@@ -191,7 +191,7 @@ internal class RDFTaxonomyProcessor : EventNotifier
                                 // entryType should be of the form "http://purl.uniprot.org/core/Taxon" or "http://purl.uniprot.org/core/Strain"
                                 // Extract the text after the last forward slash
 
-                                entryType = GeValueAfterLastSlash(entryType);
+                                entryType = GetValueAfterLastSlash(entryType);
 
                                 if (entryType.Equals("Strain", StringComparison.OrdinalIgnoreCase))
                                 {
@@ -234,15 +234,40 @@ internal class RDFTaxonomyProcessor : EventNotifier
             OnStatusEvent("Found {0:N0} taxonomy entries, of which {1:N0} are leaf nodes", taxonomyEntries.Count, leafNodeCount);
             Console.WriteLine();
 
-            var success = WriteTaxonomyInfoToFile(taxonomyEntries, outputFile);
+            var taxonomyInfoSuccess = WriteTaxonomyInfoToFile(taxonomyEntries, outputFile);
 
-            if (success)
+            if (!taxonomyInfoSuccess || !Options.SaveOtherNames)
             {
                 Console.WriteLine();
-                OnStatusEvent("Conversion is complete");
+
+                if (taxonomyInfoSuccess)
+                {
+                    OnStatusEvent("Conversion is complete");
+                    return true;
+                }
+
+                OnWarningEvent("Error creating file {0}", PathUtils.CompactPathString(outputFile.FullName, 120));
+                return false;
             }
 
-            return success;
+            var otherNamesFileName = string.Format("{0}{1}", Path.GetFileNameWithoutExtension(outputFile.Name), "_OtherNames.txt");
+
+            var otherNamesFile = outputFile.Directory == null
+                ? new FileInfo(otherNamesFileName)
+                : new FileInfo(Path.Combine(outputFile.Directory.FullName, otherNamesFileName));
+
+            var otherNamesSuccess = WriteOtherNamesToFile(taxonomyEntries, otherNamesFile);
+
+            Console.WriteLine();
+
+            if (otherNamesSuccess)
+            {
+                OnStatusEvent("Conversion is complete");
+                return true;
+            }
+
+            OnWarningEvent("Error creating file {0}", PathUtils.CompactPathString(otherNamesFile.FullName, 120));
+            return false;
         }
         catch (Exception ex)
         {
@@ -531,7 +556,80 @@ internal class RDFTaxonomyProcessor : EventNotifier
         writer.WriteLine(string.Join("\t", lineOut));
     }
 
-    private bool WriteTaxonomyInfoToFile(Dictionary<int, TaxonomyEntry> taxonomyEntries, FileSystemInfo outputFile)
+    private bool WriteOtherNamesToFile(
+        Dictionary<int, TaxonomyEntry> taxonomyEntries,
+        FileSystemInfo outputFile)
+    {
+        try
+        {
+            OnStatusEvent("Creating " + outputFile.FullName);
+
+            var yearMatcher = new Regex(@" [1-2]\d{3}\b", RegexOptions.Compiled);
+
+            using var writer = new StreamWriter(new FileStream(outputFile.FullName, FileMode.Create, FileAccess.Write, FileShare.ReadWrite));
+
+            var columnHeaders = new List<string>
+                {
+                    "Identifier",
+                    "Other_Name"
+                };
+
+            writer.WriteLine(string.Join("\t", columnHeaders));
+
+            var columnCount = columnHeaders.Count;
+            var lineOut = new List<string>();
+
+            foreach (var entry in taxonomyEntries.Values)
+            {
+                lineOut.Clear();
+                lineOut.Add(entry.Identifier.ToString());
+                lineOut.Add(string.Empty);
+
+                var firstNameWritten = false;
+
+                foreach (var otherName in entry.OtherNames)
+                {
+                    if (firstNameWritten)
+                    {
+                        // ReSharper disable CommentTypo
+
+                        // Check for cases where the current value of otherName starts with the same text as the previously written name, but the current entry contains a year
+                        // Examples:
+                        //   "Agromonas" and "Agromonas Ohta and Hattori 1985"
+                        //   "Sarcobium" and "Sarcobium Drozanski 1991"
+                        //   "Eriophorum crinigerum (A.Gray) Beetle" and "Eriophorum crinigerum (A.Gray) Beetle, 1942"
+                        //   "Francisella tularensis subsp. novicida" and "Francisella tularensis subsp. novicida (Larson et al. 1955) Huber et al. 2010"
+
+                        // ReSharper restore CommentTypo
+
+                        // When near-duplicates like those shone above are found, skip the second entry
+                        if (otherName.StartsWith(lineOut[1]) && yearMatcher.IsMatch(otherName))
+                        {
+                            continue;
+                        }
+                    }
+                    else
+                    {
+                        firstNameWritten = true;
+                    }
+
+                    lineOut[1] = otherName;
+                    WriteLine(writer, lineOut, columnCount, NullValueFlag);
+                }
+            }
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            OnErrorEvent("Error occurred in WriteOtherNamesToFile", ex);
+            return false;
+        }
+    }
+
+    private bool WriteTaxonomyInfoToFile(
+            Dictionary<int, TaxonomyEntry> taxonomyEntries,
+            FileSystemInfo outputFile)
     {
         try
         {

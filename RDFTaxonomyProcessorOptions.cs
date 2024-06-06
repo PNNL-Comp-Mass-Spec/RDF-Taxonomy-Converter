@@ -6,7 +6,7 @@ internal class RDFTaxonomyProcessorOptions
 {
     // Ignore Spelling: Postgres
 
-    public const string PROGRAM_DATE = "June 5, 2024";
+    public const string PROGRAM_DATE = "June 6, 2024";
 
     /// <summary>
     /// Input file path
@@ -50,6 +50,9 @@ internal class RDFTaxonomyProcessorOptions
         HelpText = "When true, include the mnemonic name (a five letter abbreviation of the scientific name)")]
     public bool IncludeMnemonic { get; set; } = true;
 
+    [Option("SaveOtherNames", "OtherNames", HelpShowsDefault = false,
+        HelpText = "When true, create a file with other (alternative) names for the taxonomy entries. Columns are Taxonomy_ID and Other_Name")]
+    public bool SaveOtherNames { get; set; } = true;
 
     [Option("FormatForPostgres", "Postgres", HelpShowsDefault = false,
         HelpText = "When true, use \\N for null values (empty columns in the output file), " +
