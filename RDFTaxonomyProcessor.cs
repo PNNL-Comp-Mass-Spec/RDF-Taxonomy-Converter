@@ -96,6 +96,24 @@ internal class RDFTaxonomyProcessor : EventNotifier
         }
     }
 
+    private void AppendAlternateNames(ICollection<string> lineOut, TaxonomyEntry entry)
+    {
+        if (Options.IncludeCommonName)
+        {
+            lineOut.Add(GetValueOrNull(entry.CommonName));
+        }
+
+        if (Options.IncludeSynonym)
+        {
+            lineOut.Add(GetValueOrNull(entry.Synonym));
+        }
+
+        if (Options.IncludeMnemonic)
+        {
+            lineOut.Add(GetValueOrNull(entry.Mnemonic));
+        }
+    }
+
     private static byte BoolToTinyInt(bool value)
     {
         if (value)
@@ -552,6 +570,15 @@ internal class RDFTaxonomyProcessor : EventNotifier
                 columnHeaders.Add("Grandparent_Term_ID");
             }
 
+            if (Options.IncludeCommonName)
+            {
+                columnHeaders.Add("Common_Name");
+            }
+
+            if (Options.IncludeSynonym)
+            {
+                columnHeaders.Add("Synonym");
+            }
             if (Options.IncludeMnemonic)
             {
                 columnHeaders.Add("Mnemonic");
@@ -582,10 +609,7 @@ internal class RDFTaxonomyProcessor : EventNotifier
                         }
                     }
 
-                    if (Options.IncludeMnemonic)
-                    {
-                        lineOut.Add(GetValueOrNull(entry.Mnemonic));
-                    }
+                    AppendAlternateNames(lineOut, entry);
 
                     WriteLine(writer, lineOut, columnCount, NullValueFlag);
                     continue;
@@ -604,10 +628,7 @@ internal class RDFTaxonomyProcessor : EventNotifier
                         lineOut.Add(NullValueFlag); // Grandparent term ID
                     }
 
-                    if (Options.IncludeMnemonic)
-                    {
-                        lineOut.Add(GetValueOrNull(entry.Mnemonic));
-                    }
+                    AppendAlternateNames(lineOut, entry);
 
                     WriteLine(writer, lineOut, columnCount, NullValueFlag);
                     continue;
@@ -628,10 +649,7 @@ internal class RDFTaxonomyProcessor : EventNotifier
                     lineOut.Add(NullValueFlag);     // Grandparent term identifier
                 }
 
-                if (Options.IncludeMnemonic)
-                {
-                    lineOut.Add(GetValueOrNull(entry.Mnemonic));
-                }
+                AppendAlternateNames(lineOut, entry);
 
                 WriteLine(writer, lineOut, columnCount, NullValueFlag);
             }

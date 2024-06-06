@@ -26,6 +26,10 @@ internal class RDFTaxonomyProcessorOptions
                    "If omitted, the output file will be auto-named, and created in the same directory as the input file")]
     public string OutputFilePath { get; set; }
 
+    [Option("IncludeRank", "Rank", HelpShowsDefault = false,
+        HelpText = "When true, include classification rank (family, genus, species, etc.) in the output")]
+    public bool IncludeRank { get; set; } = true;
+
     [Option("IncludeParentTerms", "IncludeParents", HelpShowsDefault = false,
         HelpText = "When true, include columns Parent_Term_Name and Parent_Term_ID in the output")]
     public bool IncludeParentTerms { get; set; } = true;
@@ -34,13 +38,18 @@ internal class RDFTaxonomyProcessorOptions
         HelpText = "When true, include columns Grandparent_Term_Name and Grandparent_Term_ID in the output")]
     public bool IncludeGrandparentTerms { get; set; } = true;
 
+    [Option("IncludeCommonName", "CommonName", HelpShowsDefault = false,
+        HelpText = "When true, include the common name (if defined)")]
+    public bool IncludeCommonName { get; set; } = true;
+
+    [Option("IncludeSynonym", "Synonym", HelpShowsDefault = false,
+        HelpText = "When true, include the synonym (if defined)")]
+    public bool IncludeSynonym { get; set; } = true;
+
     [Option("IncludeMnemonic", "Mnemonic", HelpShowsDefault = false,
         HelpText = "When true, include the mnemonic name (a five letter abbreviation of the scientific name)")]
     public bool IncludeMnemonic { get; set; } = true;
 
-    [Option("IncludeRank", "Rank", HelpShowsDefault = false,
-        HelpText = "When true, include classification rank (family, genus, species, etc.) in the output")]
-    public bool IncludeRank { get; set; } = true;
 
     [Option("FormatForPostgres", "Postgres", HelpShowsDefault = false,
         HelpText = "When true, use \\N for null values (empty columns in the output file), " +
