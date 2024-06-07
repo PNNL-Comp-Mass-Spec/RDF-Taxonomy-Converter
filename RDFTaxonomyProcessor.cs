@@ -548,8 +548,7 @@ internal class RDFTaxonomyProcessor : EventNotifier
                     continue;
 
                 // Escape backslashes with \\
-                // Replace double quotes with ""
-                lineOut[i] = lineOut[i].Replace(@"\", @"\\").Replace("\"", "\"\"");
+                lineOut[i] = lineOut[i].Replace(@"\", @"\\");
             }
         }
 

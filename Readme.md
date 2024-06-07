@@ -39,10 +39,32 @@ Use `/IncludeMnemonic:False` to disable including the mnemonic name (a five lett
 
 Use `/OtherNames:False` to disable creating a file listing other names for the taxonomy terms
 
-Use `/Postgres` to use \N for null values (empty columns in the output file), escape backslashes, and replace double quotes with ""
-* This allows the data file to be imported using the COPY command, e.g.
+Use `/Postgres` to use \N for null values (empty columns in the output file) and to escape backslashes
+* This allows the data file to be imported using the `COPY` command in psql
+* The file must be readable by the PostgreSQL server process, for example directory `/tmp/`
+  * Example commands:
+  
 ```
-COPY ont.t_tmp_newt FROM '/tmp/taxonomy_info.txt' CSV HEADER DELIMITER E'\t' QUOTE '"'
+$ psql
+
+\c dms
+
+CREATE TABLE ont.t_tmp_newt (
+    term_pk text,
+    term_name text,
+    identifier int,
+    is_leaf int,
+    rank text,
+    parent_term_name text NULL,
+    parent_term_id text NULL,
+    grandparent_term_name text NULL,
+    grandparent_term_id text NULL,
+    common_name text NULL,
+    synonym text NULL,
+    mnemonic text NULL
+);
+
+COPY ont.t_tmp_newt FROM '/tmp/taxonomy_info_pg.txt' WITH (FORMAT TEXT, HEADER, DELIMITER E'\t');
 ```
 
 The processing options can be specified in a parameter file using `/ParamFile:Options.conf` or `/Conf:Options.conf`

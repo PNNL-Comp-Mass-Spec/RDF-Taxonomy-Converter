@@ -55,10 +55,9 @@ internal class RDFTaxonomyProcessorOptions
     public bool SaveOtherNames { get; set; } = true;
 
     [Option("FormatForPostgres", "Postgres", HelpShowsDefault = false,
-        HelpText = "When true, use \\N for null values (empty columns in the output file), " +
-                   "escape backslashes, and replace double quotes with \"\". " +
+        HelpText = "When true, use \\N for null values (empty columns in the output file) and escape backslashes. " +
                    "This allows the data file to be imported using the COPY command: " +
-                   "COPY ont.t_tmp_newt FROM '/tmp/taxonomy_info.txt' CSV HEADER DELIMITER E'\\t' QUOTE '\"'")]
+                   "COPY ont.t_tmp_newt FROM '/tmp/taxonomy_info_pg.txt' WITH (FORMAT TEXT, HEADER, DELIMITER E'\\t');")]
     public bool FormatForPostgres { get; set; }
 
     /// <summary>
