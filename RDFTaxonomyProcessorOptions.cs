@@ -6,7 +6,7 @@ internal class RDFTaxonomyProcessorOptions
 {
     // Ignore Spelling: Postgres
 
-    public const string PROGRAM_DATE = "June 6, 2024";
+    public const string PROGRAM_DATE = "June 7, 2024";
 
     /// <summary>
     /// Input file path

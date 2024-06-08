@@ -731,7 +731,7 @@ internal class RDFTaxonomyProcessor : EventNotifier
                     continue;
                 }
 
-                var grandparentFound = GetAncestor(taxonomyEntries, parentTerm.Identifier, out var grandparentTerm);
+                var grandparentFound = GetAncestor(taxonomyEntries, parentTerm.ParentTermID, out var grandparentTerm);
 
                 lineOut.AddRange(TaxonomyTermWithParents(entry, parentTerm));
 
