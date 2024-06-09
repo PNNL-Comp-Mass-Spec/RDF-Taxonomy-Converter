@@ -56,9 +56,9 @@ CREATE TABLE ont.t_tmp_newt (
     is_leaf int,
     rank text,
     parent_term_name text NULL,
-    parent_term_id text NULL,
+    parent_term_id int NULL,
     grandparent_term_name text NULL,
-    grandparent_term_id text NULL,
+    grandparent_term_id int NULL,
     common_name text NULL,
     synonym text NULL,
     mnemonic text NULL
